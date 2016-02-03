@@ -1,51 +1,70 @@
 <!doctype html>
 <html>
+
 <head>
-  <meta charset="utf-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1, user-scalable=yes">
-
-  <title>paper-date-picker Demo</title>
- 
-  <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
-
-  <link rel="import" href="../paper-date-picker.html">
-  <link rel="import" href="../../paper-styles/demo-pages.html">
-  <link rel="import" href="../../paper-dialog/paper-dialog.html">
-  <link rel="import" href="../../paper-button/paper-button.html">
-
-  <style is="custom-style">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1, user-scalable=yes">
+    <title>paper-date-picker Demo</title>
+    <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
+    <link rel="import" href="../paper-date-picker.html">
+    <link rel="import" href="../../paper-styles/demo-pages.html">
+    <link rel="import" href="../../paper-dialog/paper-dialog.html">
+    <link rel="import" href="../../paper-button/paper-button.html">
+    <style is="custom-style">
     section {
-      margin: 24px;
+        margin: 24px;
     }
+
     h3 {
-      text-align: center;
+        text-align: center;
     }
+
     #container {
-      margin: 0 auto;
-      height: 300px;
-      width: 300px;
+        margin: 0 auto;
+        height: 300px;
+        width: 300px;
     }
-  </style>
+    </style>
 </head>
+
 <body unresolved>
-  <template is="dom-bind" id="scope">
-    <h3>{{dateFormat(date, 'LLL')}}</h3>
-    <section>
-      <div id="container">
-        <paper-calendar id="picker" date="{{date}}"></paper-calendar>
-      </div>
-    </section>
-  </template>
-  <script>
+    <template is="dom-bind" id="scope">
+        <h3>
+      {{ message }}
+    </h3>
+        <!-- <h3> FROM {{ dateFormat(dateRange.from) }} -- TO  {{ dateFormat(dateRange.to) }} </h3> -->
+        <section>
+            <div id="container">
+                <paper-calendar
+                is-range
+                id="picker"
+                date-range="{{ dateRange }}"
+                selection-turn="{{ selectionTurn }}"></paper-calendar>
+            </div>
+        </section>
+    </template>
+    <script>
     var scope = Polymer.dom(document).querySelector('#scope');
+    scope.message = "Select Check-in Date";
+    scope.addEventListener('dom-change', function() {
+        var picker = document.querySelector('#picker');
+        picker.addEventListener('selection-turn-changed', function(e) {
+            if(e.detail.value == "from"){
+              scope.message = "Inta kbeeer";
+            }else {
+              scope.message = "Select Check-out Date";
+            }
+        })
+    });
+
     scope.dateFormat = function(date, format) {
-      if (!date) {
-        return 'No date selected';
-      }
-      return moment(date).format(format);
+        if (!date) {
+            return 'No date selected';
+        }
+        return moment(date).calendar();
     };
-    scope.date = new Date(2017, 3, 13);
-  </script>
+    </script>
 </body>
+
 </html>

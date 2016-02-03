@@ -9,9 +9,10 @@
 <link rel="import" href="../iron-flex-layout/iron-flex-layout.html">
 <link rel="import" href="../paper-styles/paper-styles.html">
 <link rel="import" href="../moment-element/moment-with-locales-import.html">
+<link rel="import" href="../iron-icons/iron-icons.html">
+<link rel="import" href="../iron-icon/iron-icon.html">
 <link rel="import" href="paper-calendar.html">
 <link rel="import" href="paper-date-picker-dialog-style.html">
-
 <!--
 Material Design [Pickers](http://www.google.com/design/spec/components/pickers.html)
 
@@ -36,7 +37,7 @@ If you include this element as part of `paper-dialog`, use the class
 `"paper-date-picker-dialog"` on the dialog element in order to give it proper
 styling:
 
-    <paper-dialog id="dialog" class="paper-date-picker-dialog" modal 
+    <paper-dialog id="dialog" class="paper-date-picker-dialog" modal
       on-iron-overlay-closed="dismissDialog">
       <paper-date-picker id="picker" date="[[date]]"></paper-date-picker>
       <div class="buttons">
@@ -79,7 +80,10 @@ styling:
       #heading {
         width: 168px;
         @apply(--paper-date-picker-heading);
+        text-align: right;
       }
+
+
 
       /** Narrow *********************/
       :host([narrow]) #datePicker {
@@ -88,6 +92,13 @@ styling:
         @apply(--layout-vertical);
       }
       :host([narrow]) #heading {
+        text-align: left !important;
+        width: auto;
+        height: 80px;
+        padding: 16px 24px;
+      }
+
+      :host([narrow]) #heading .iron-icon {
         width: auto;
         height: 96px;
         padding: 16px 24px;
@@ -97,17 +108,19 @@ styling:
       #heading {
         padding: 16px;
         box-sizing: border-box;
-        color: var(--text-primary-color); 
+        color: var(--text-primary-color);
         background: var(--default-primary-color);
         @apply(--layout-vertical);
         @apply(--layout-around-justfied);
       }
+
       #heading .date,
       #heading .year {
         cursor: pointer;
       }
       #heading .date {
-        @apply(--paper-font-display1);
+        @apply(--paper-font-subhead);
+        /*@apply(--paper-font-title);*/
         font-weight: bold;
         margin-top: 2px;
         @apply(--paper-date-picker-heading-date);
@@ -116,7 +129,7 @@ styling:
         letter-spacing: 0.025em;
       }
       #heading .date span {
-        white-space: nowrap;
+        white-space: normal;
       }
       #heading .year {
         @apply(--paper-font-body2);
@@ -128,6 +141,10 @@ styling:
         color: var(--light-primary-color);
       }
 
+      .message{
+          @apply(--paper-font-body1);
+          color: rgb(114, 126, 200);
+      }
       /** Calendar/Year picker ********/
       #pages {
         flex: 1;
@@ -167,29 +184,50 @@ styling:
         color: var(--default-primary-color);
       }
       :host([isTouch]) #yearList::-webkit-scrollbar {
-        width: 0 !important 
+        width: 0 !important
       }
     </style>
     <iron-media-query query="{{_getMediaQuery(forceNarrow, responsiveWidth)}}" query-matches="{{_queryMatches}}"></iron-media-query>
     <div id="datePicker">
-      <div id="heading" class$="{{_getHeadingClass('heading-content', _selectedPage)}}">
-        <div class="year" on-tap="_tapHeadingYear">{{dateFormat(date, 'YYYY', locale)}}</div>
-        <div class="date" on-tap="_tapHeadingDate">
-          <template is="dom-repeat" items="{{_splitHeadingDate(date, headingFormat, locale)}}">
-            <span>{{item}}</span>
-          </template>
+      <!-- Range Datepicker Heading -->
+      <template is="dom-if" if="{{ isRange }}">
+        <div id="heading" class$="{{_getHeadingClass('heading-content', _selectedPage)}}">
+          <div class="year" on-tap="_tapHeadingYear">{{dateFormat(date, 'YYYY', locale)}}</div>
+          <div class="date" on-tap="_tapHeadingDate">
+            <span class="message message-from">From</span>
+            <span> {{ dateFormat(dateRange.from, headingFormat, locale) }} </span>
+            <span class="message message-to"> To </span>
+            <span> {{ dateFormat(dateRange.to, headingFormat, locale) }} </span>
+          </div>
         </div>
-      </div>
-      <neon-animated-pages id="pages" selected="{{_selectedPage}}" attr-for-selected="id" 
+      </template>
+      <!-- Single Datepicker Heading -->
+      <template is="dom-if" if="{{ !isRange }}">
+        <div id="heading" class$="{{_getHeadingClass('heading-content', _selectedPage)}}">
+          <div class="year" on-tap="_tapHeadingYear">{{dateFormat(date, 'YYYY', locale)}}</div>
+          <div class="date" on-tap="_tapHeadingDate">
+            <template is="dom-repeat" items="{{_splitHeadingDate(date, headingFormat, locale)}}">
+              <span>{{item}}</span>
+            </template>
+          </div>
+        </div>
+      </template>
+      <!-- Calendar -->
+      <neon-animated-pages id="pages" selected="{{_selectedPage}}" attr-for-selected="id"
         entry-animation="fade-in-animation" exit-animation="fade-out-animation">
         <neon-animatable id="chooseDate">
-          <paper-calendar id="calendar" locale="{{locale}}" date="{{date}}"
-            min-date="{{minDate}}" max-date="{{maxDate}}">
+          <paper-calendar id="calendar"
+            locale="{{locale}}"
+            date="{{ date }}"
+            date-range="{{ dateRange }}"
+            min-date="{{minDate}}"
+            max-date="{{maxDate}}"
+            is-range$="{{ isRange }}">
           </paper-calendar>
         </neon-animatable>
         <neon-animatable id="chooseYear">
           <div id="yearList" cross-fade>
-            <iron-selector id="yearSelector" attr-for-selected="label" 
+            <iron-selector id="yearSelector" attr-for-selected="label"
               on-iron-select="_yearSelected">
               <template is="dom-repeat" items="{{years}}" as="year">
                 <div class="year" label$="{{year}}" on-tap="_tapYear">{{year}}</div>
@@ -205,6 +243,14 @@ styling:
     Polymer({
       is: 'paper-date-picker',
       properties: {
+        isRange : {
+          type : Boolean,
+          value : false
+        },
+        dateRange : {
+          type : Object,
+          notify : true
+        },
         /**
          * The selected date (YYYY-MM-DD)
          */
@@ -293,6 +339,8 @@ styling:
         this._selectPage('chooseDate');
       },
       dateFormat: function() {
+        if(!this.$.calendar._isValidDate(arguments[0]))
+          return "";
         return this.$.calendar.dateFormat.apply(this.$.calendar, arguments);
       },
       _tapYear: function() {
