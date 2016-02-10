@@ -773,12 +773,23 @@
                 this.date = event.model.item.date;
             },
             _tapDayRange: function(event) {
+                // from
+                // when user click the same date twice
+                // console.log(event.model.item.date);
+                // var isToAndSameAsFrom = ;
+                if(this.selectionTurn == "to" && moment(event.model.item.date).isSame(moment(this.dateRange.from))) {
+                    this.selectionTurn = "from"
+                    console.log("i am here");
+                }
+                
+                // console.log(isToAndSameAsFrom);
                 if (this.selectionTurn == "from") {
                     this.dateRange = {
                         from: event.model.item.date,
                         to: null
                     };
                     this.selectionTurn = "to";
+                // to
                 } else {
                     if (moment(event.model.item.date).isBefore(this.dateRange.from)) {
                         this.selectionTurn = "from";
