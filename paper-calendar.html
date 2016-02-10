@@ -6,6 +6,11 @@
 <link rel="import" href="../iron-resizable-behavior/iron-resizable-behavior.html">
 <link rel="import" href="../iron-selector/iron-selector.html">
 <link rel="import" href="../moment-element/moment-with-locales-import.html">
+<link rel="import" href="../iron-media-query/iron-media-query.html">
+<link rel="import" href="../neon-animation/neon-animated-pages.html">
+<link rel="import" href="../neon-animation/neon-animatable.html">
+<link rel="import" href="../neon-animation/animations/fade-in-animation.html">
+<link rel="import" href="../neon-animation/animations/fade-out-animation.html">
 <dom-module id="paper-calendar">
     <template>
         <style>
@@ -35,58 +40,58 @@
             user-select: none;
             @apply(--paper-calendar);
         }
-
+        
         #calendar {
             position: relative;
             width: 100%;
             height: 100%;
             @apply(--layout-horizontal);
         }
-
+        
         #months {
             height: 100%;
             @apply(--layout-horizontal);
         }
-
+        
         #months.animating .month-nav {
             opacity: 1;
         }
-
+        
         #months.animating {
             transition-property: transform, opacity;
             transition-duration: 300ms;
         }
-
+        
         #months.animating.swipe {
             transition-timing-function: var(--ease-in-sine);
             --webkit-transition-timing-function: var(--ease-in-sine);
         }
-
+        
         #months.animating.reset {
             transition-timing-function: var(--ease-out-sine);
             --webkit-transition-timing-function: var(--ease-out-sine);
         }
-
+        
         .month {
             flex: 1;
             height: 100%;
             @apply(--layout-vertical);
             @apply(--layout-justified);
         }
-
+        
         .month-row,
         .month-nav {
             height: calc(100%/8);
             box-sizing: border-box;
             padding: 0 calc(100%/36);
         }
-
+        
         .month-col {
             position: relative;
             @apply(--layout-vertical);
             @apply(--layout-flex);
         }
-
+        
         .month-nav {
             position: absolute;
             top: 0;
@@ -94,17 +99,17 @@
             width: 100%;
             opacity: 1;
         }
-
+        
         .month-nav .col {
             position: relative;
             @apply(--layout-vertical);
             @apply(--layout-center-center);
         }
-
+        
         .month-nav .btn .icon {
             cursor: pointer;
         }
-
+        
         .month-nav .btn .ripple {
             position: absolute;
             width: 48px;
@@ -113,11 +118,11 @@
             left: 50%;
             transform: translate(-50%, -50%);
         }
-
+        
         .month-nav .btn.right {
             text-align: right;
         }
-
+        
         .month-name {
             line-height: 24px;
             vertical-align: middle;
@@ -125,11 +130,11 @@
             font-weight: bold;
             @apply(--paper-font-body2);
         }
-
+        
         .month-weekdays {
             color: var(--secondary-text-color);
         }
-
+        
         .month-col .day {
             cursor: default;
             pointer-events: none;
@@ -143,44 +148,44 @@
             @apply(--layout-vertical);
             @apply(--layout-center-center);*/
         }
-
+        
         .day-item {
             flex: 1;
             object-fit: contain;
         }
-
+        
         .day-item::selection {
             background: none;
         }
-
+        
         .day-item .selection {
             fill: rgba(0, 0, 0, 0);
         }
-
+        
         .day-item.selected .selection {
             fill: var(--default-primary-color);
         }
-
+        
         .day-item.in-btween .selection {
             fill: aqua;
         }
-
+        
         .day-item.selected + .day {
             color: var(--text-primary-color);
         }
-
+        
         .day-item:not([disabled]) {
             cursor: pointer;
         }
-
+        
         .day-item[disabled] + .day {
             color: var(--text-disabled-color, #9d9d9d);
         }
-
+        
         .day-item.today + .day {
             color: var(--default-primary-color);
         }
-
+        
         .day-item.selected.today + .day {
             color: var(--text-primary-color);
         }
@@ -204,7 +209,7 @@
                                 <template is="dom-repeat" items="{{row}}">
                                     <div class="month-col">
                                         <svg version="1.1" viewBox="0 0 100 102" class$="{{_getDayClass('day-item', item.date, today, date, dateRange)}}" disabled$="{{_isDisabled(item.day, item.date, minDate, maxDate)}}" on-tap="_tapDay" date$="{{item.name}}" xmlns="http://www.w3.org/2000/svg">
-                                            <rect x="50%" y="-10" width="100%" height="200%"/>
+                                            <rect x="50%" y="-10" width="100%" height="200%" />
                                             <circle cx="50" cy="51" r="50" class="selection"></circle>
                                         </svg>
                                         <div class="day layout layout-align-center-center layout-fit layout-column">{{item.day}}</div>
@@ -237,6 +242,7 @@
 
         // Ignore movement within this distance (px)
         var WIGGLE_THRESHOLD = 4;
+        var WIGGLE_THRESHOLD_SQUARE = WIGGLE_THRESHOLD * WIGGLE_THRESHOLD;
 
         // what constitues a flick (px/ms)
         var FLICK_SPEED = 0.5;
@@ -462,13 +468,13 @@
             },
             _getDayClassRange: function(cssClass, date) {
 
-                if (this.dateRange.from && this.dateRange.from.getTime() === date.getTime()){
+                if (this.dateRange.from && this.dateRange.from.getTime() === date.getTime()) {
                     cssClass += ' selected';
 
-                    if(moment(this.dateRange.to).isValid()) cssClass += ' from';
+                    if (moment(this.dateRange.to).isValid()) cssClass += ' from';
                 }
 
-                if (this.dateRange.to && this.dateRange.to.getTime() === date.getTime()){
+                if (this.dateRange.to && this.dateRange.to.getTime() === date.getTime()) {
                     cssClass += ' to selected';
                 }
 
@@ -508,8 +514,9 @@
                     this._moveQueue.push(event);
 
                     // ignore movement within WIGGLE_THRESHOLD
-                    var distance = Math.sqrt((dx * dx) + (dy * dy));
-                    if (!this._gesture && distance > WIGGLE_THRESHOLD) {
+                    // var distance = Math.sqrt((dx * dx) + (dy * dy));
+                    var distance = (dx * dx) + (dy * dy);
+                    if (!this._gesture && distance > WIGGLE_THRESHOLD_SQUARE) {
                         this._gesture = adx > ady ? 'pan-x' : 'pan-y';
                     }
 
@@ -613,26 +620,49 @@
             _getFastestMovement: function(event) {
                 // detect flick based on fastest segment of movement
                 var l = this._moveQueue.length;
-                var dt, tx, ty, tv, x = 0,
+                var dt, tx, ty, tv2, x = 0,
                     y = 0,
-                    v = 0;
+                    v2 = 0;
                 for (var i = 0, m; i < l && (m = this._moveQueue[i]); i++) {
                     dt = event.timeStamp - m.timeStamp;
                     tx = (event.detail.x - m.detail.x) / dt;
                     ty = (event.detail.y - m.detail.y) / dt;
-                    tv = Math.sqrt(tx * tx + ty * ty);
-                    if (tv > v) {
+                    tv2 = tx * tx + ty * ty;
+                    if (tv2 > v2) {
                         x = tx;
                         y = ty;
-                        v = tv;
+                        v2 = tv2;
                     }
                 }
                 return {
                     x: x,
                     y: y,
-                    v: v
+                    v: Math.sqrt(v2)
                 };
             },
+            // _getFastestMovement: function(event) {
+            //     // detect flick based on fastest segment of movement
+            //     var l = this._moveQueue.length;
+            //     var dt, tx, ty, tv, x = 0,
+            //         y = 0,
+            //         v = 0;
+            //     for (var i = 0, m; i < l && (m = this._moveQueue[i]); i++) {
+            //         dt = event.timeStamp - m.timeStamp;
+            //         tx = (event.detail.x - m.detail.x) / dt;
+            //         ty = (event.detail.y - m.detail.y) / dt;
+            //         tv = Math.sqrt(tx * tx + ty * ty);
+            //         if (tv > v) {
+            //             x = tx;
+            //             y = ty;
+            //             v = tv;
+            //         }
+            //     }
+            //     return {
+            //         x: x,
+            //         y: y,
+            //         v: v
+            //     };
+            // },
             _onSwipe: function(event) {
                 if (event.detail.direction === 'right') {
                     this._prevMonth();
@@ -757,7 +787,7 @@
                             to: null
                         };
                         this.selectionTurn = "to";
-                    }else{
+                    } else {
                         this.dateRange = {
                             from: this.dateRange.from,
                             to: event.model.item.date
