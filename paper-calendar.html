@@ -13,6 +13,7 @@
             display: block;
             box-sizing: border-box;
             padding: 12px 0;
+            direction: ltr;
             position: relative;
             width: 100%;
             height: 100%;
@@ -132,9 +133,15 @@
         .month-col .day {
             cursor: default;
             pointer-events: none;
-            @apply(--layout-fit);
+            z-index: 4;
+            position: absolute;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            left: 0;
+            /*@apply(--layout-fit);
             @apply(--layout-vertical);
-            @apply(--layout-center-center);
+            @apply(--layout-center-center);*/
         }
 
         .day-item {
@@ -188,7 +195,7 @@
                         <div class="month-row month-weekdays week layout horizontal justified flex">
                             <template is="dom-repeat" items="{{_weekdays}}">
                                 <div class="month-col layout vertical flex">
-                                    <div class="day">{{item.0}}</div>
+                                    <div class="day layout layout-align-center-center layout-fit layout-column">{{item.0}}</div>
                                 </div>
                             </template>
                         </div>
@@ -196,10 +203,11 @@
                             <div class="month-row layout horizontal justified flex">
                                 <template is="dom-repeat" items="{{row}}">
                                     <div class="month-col">
-                                        <svg version="1.1" viewBox="0 0 100 100" class$="{{_getDayClass('day-item', item.date, today, date, dateRange)}}" disabled$="{{_isDisabled(item.day, item.date, minDate, maxDate)}}" on-tap="_tapDay" date$="{{item.name}}">
-                                            <circle cx="50" cy="50" r="49" class="selection"></circle>
+                                        <svg version="1.1" viewBox="0 0 100 102" class$="{{_getDayClass('day-item', item.date, today, date, dateRange)}}" disabled$="{{_isDisabled(item.day, item.date, minDate, maxDate)}}" on-tap="_tapDay" date$="{{item.name}}" xmlns="http://www.w3.org/2000/svg">
+                                            <rect x="50%" y="-10" width="100%" height="200%"/>
+                                            <circle cx="50" cy="51" r="50" class="selection"></circle>
                                         </svg>
-                                        <div class="day">{{item.day}}</div>
+                                        <div class="day layout layout-align-center-center layout-fit layout-column">{{item.day}}</div>
                                     </div>
                                 </template>
                             </div>
@@ -454,11 +462,15 @@
             },
             _getDayClassRange: function(cssClass, date) {
 
-                if (this.dateRange.from && this.dateRange.from.getTime() === date.getTime())
+                if (this.dateRange.from && this.dateRange.from.getTime() === date.getTime()){
                     cssClass += ' selected';
 
-                if (this.dateRange.to && this.dateRange.to.getTime() === date.getTime())
-                    cssClass += ' selected';
+                    if(moment(this.dateRange.to).isValid()) cssClass += ' from';
+                }
+
+                if (this.dateRange.to && this.dateRange.to.getTime() === date.getTime()){
+                    cssClass += ' to selected';
+                }
 
                 if (this.dateRange.to && this.dateRange.from) {
                     if (moment(date).isBefore(moment(this.dateRange.to)) && moment(date).isAfter(moment(this.dateRange.from)))
