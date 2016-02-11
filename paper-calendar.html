@@ -264,12 +264,7 @@
                 dateRange: {
                     type: Object,
                     notify: true,
-                    value: function() {
-                        return {
-                            from: moment().date(11).month(3).year(2017).toDate(),
-                            to: moment().date(15).month(3).year(2017).toDate()
-                        }
-                    },
+                    value: {},
                     observer: '_dateRangeChanged'
                 },
                 /**
@@ -715,7 +710,9 @@
                 this.currentMonth = date.getMonth() + 1;
             },
             _dateRangeChanged: function(dateRange, oldValue) {
-
+                
+                if(!dateRange.to && !dateRange.from) return;
+                
                 if (this.selectionTurn == "from") {
                     if (!this._isValidDate(dateRange.from)) {
                         console.warn('Invalid date: ' + dateRange);
@@ -760,6 +757,7 @@
                 this.set('dateRange', dateRange);
                 this.currentYear = dateRange.from.getFullYear();
                 this.currentMonth = dateRange.from.getMonth() + 1;
+
             },
             _tapDay: function(event) {
 
@@ -779,7 +777,6 @@
                 // var isToAndSameAsFrom = ;
                 if(this.selectionTurn == "to" && moment(event.model.item.date).isSame(moment(this.dateRange.from))) {
                     this.selectionTurn = "from"
-                    console.log("i am here");
                 }
                 
                 // console.log(isToAndSameAsFrom);
@@ -806,6 +803,9 @@
                         this.selectionTurn = "from";
                     }
                 }
+                
+                this.fire('date-range-change', this);
+
             },
             _isValidDate: function(date) {
                 return date && date.getTime && !isNaN(date.getTime());
