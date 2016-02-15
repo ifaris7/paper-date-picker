@@ -266,9 +266,9 @@
                     notify: true,
                     value: function() {
                         return {
-                            from: moment().date(11).month(3).year(2017).toDate(),
-                            to: moment().date(15).month(3).year(2017).toDate()
-                        }
+                            from: null,
+                            to: null
+                        };
                     },
                     observer: '_dateRangeChanged'
                 },
@@ -715,7 +715,7 @@
                 this.currentMonth = date.getMonth() + 1;
             },
             _dateRangeChanged: function(dateRange, oldValue) {
-
+                if(!dateRange.from) return;
                 if (this.selectionTurn == "from") {
                     if (!this._isValidDate(dateRange.from)) {
                         console.warn('Invalid date: ' + dateRange);
@@ -777,11 +777,10 @@
                 // when user click the same date twice
                 // console.log(event.model.item.date);
                 // var isToAndSameAsFrom = ;
-                if(this.selectionTurn == "to" && moment(event.model.item.date).isSame(moment(this.dateRange.from))) {
+                if (this.selectionTurn == "to" && moment(event.model.item.date).isSame(moment(this.dateRange.from))) {
                     this.selectionTurn = "from"
-                    console.log("i am here");
                 }
-                
+
                 // console.log(isToAndSameAsFrom);
                 if (this.selectionTurn == "from") {
                     this.dateRange = {
@@ -789,7 +788,7 @@
                         to: null
                     };
                     this.selectionTurn = "to";
-                // to
+                    // to
                 } else {
                     if (moment(event.model.item.date).isBefore(this.dateRange.from)) {
                         this.selectionTurn = "from";
@@ -806,8 +805,7 @@
                         this.selectionTurn = "from";
                     }
                 }
-
-                this.fire('ys-datepicker:change', this);
+                this.fire('date-range-change', this);
             },
             _isValidDate: function(date) {
                 return date && date.getTime && !isNaN(date.getTime());
