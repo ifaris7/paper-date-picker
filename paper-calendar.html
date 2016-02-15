@@ -758,8 +758,14 @@
                 dateRange.to.setHours(0, 0, 0, 0);
 
                 this.set('dateRange', dateRange);
-                this.currentYear = dateRange.from.getFullYear();
-                this.currentMonth = dateRange.from.getMonth() + 1;
+                if(this._isValidDate(dateRange.to)){
+                    this.currentYear = dateRange.to.getFullYear();
+                    this.currentMonth = dateRange.to.getMonth() + 1;
+                }else{
+                    this.currentYear = dateRange.from.getFullYear();
+                    this.currentMonth = dateRange.from.getMonth() + 1;
+                }
+                console.log(this.currentYear, this.currentMonth);
             },
             _tapDay: function(event) {
 
