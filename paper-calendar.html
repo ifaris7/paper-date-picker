@@ -765,7 +765,6 @@
                     this.currentYear = dateRange.from.getFullYear();
                     this.currentMonth = dateRange.from.getMonth() + 1;
                 }
-                console.log(this.currentYear, this.currentMonth);
             },
             _tapDay: function(event) {
 
@@ -779,14 +778,11 @@
                 this.date = event.model.item.date;
             },
             _tapDayRange: function(event) {
-                // from
-                // when user click the same date twice
-                // console.log(event.model.item.date);
-                // var isToAndSameAsFrom = ;
+
                 if (this.selectionTurn == "to" && moment(event.model.item.date).isSame(moment(this.dateRange.from))) {
                     this.selectionTurn = "from"
                 }
-
+                
                 // console.log(isToAndSameAsFrom);
                 if (this.selectionTurn == "from") {
                     this.dateRange = {
