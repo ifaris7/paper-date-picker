@@ -40,58 +40,58 @@
             user-select: none;
             @apply(--paper-calendar);
         }
-        
+
         #calendar {
             position: relative;
             width: 100%;
             height: 100%;
             @apply(--layout-horizontal);
         }
-        
+
         #months {
             height: 100%;
             @apply(--layout-horizontal);
         }
-        
+
         #months.animating .month-nav {
             opacity: 1;
         }
-        
+
         #months.animating {
             transition-property: transform, opacity;
             transition-duration: 300ms;
         }
-        
+
         #months.animating.swipe {
             transition-timing-function: var(--ease-in-sine);
             --webkit-transition-timing-function: var(--ease-in-sine);
         }
-        
+
         #months.animating.reset {
             transition-timing-function: var(--ease-out-sine);
             --webkit-transition-timing-function: var(--ease-out-sine);
         }
-        
+
         .month {
             flex: 1;
             height: 100%;
             @apply(--layout-vertical);
             @apply(--layout-justified);
         }
-        
+
         .month-row,
         .month-nav {
             height: calc(100%/8);
             box-sizing: border-box;
             padding: 0 calc(100%/36);
         }
-        
+
         .month-col {
             position: relative;
             @apply(--layout-vertical);
             @apply(--layout-flex);
         }
-        
+
         .month-nav {
             position: absolute;
             top: 0;
@@ -99,17 +99,17 @@
             width: 100%;
             opacity: 1;
         }
-        
+
         .month-nav .col {
             position: relative;
             @apply(--layout-vertical);
             @apply(--layout-center-center);
         }
-        
+
         .month-nav .btn .icon {
             cursor: pointer;
         }
-        
+
         .month-nav .btn .ripple {
             position: absolute;
             width: 48px;
@@ -118,11 +118,11 @@
             left: 50%;
             transform: translate(-50%, -50%);
         }
-        
+
         .month-nav .btn.right {
             text-align: right;
         }
-        
+
         .month-name {
             line-height: 24px;
             vertical-align: middle;
@@ -130,11 +130,11 @@
             font-weight: bold;
             @apply(--paper-font-body2);
         }
-        
+
         .month-weekdays {
             color: var(--secondary-text-color);
         }
-        
+
         .month-col .day {
             cursor: default;
             pointer-events: none;
@@ -148,44 +148,44 @@
             @apply(--layout-vertical);
             @apply(--layout-center-center);*/
         }
-        
+
         .day-item {
             flex: 1;
             object-fit: contain;
         }
-        
+
         .day-item::selection {
             background: none;
         }
-        
+
         .day-item .selection {
             fill: rgba(0, 0, 0, 0);
         }
-        
+
         .day-item.selected .selection {
             fill: var(--default-primary-color);
         }
-        
+
         .day-item.in-btween .selection {
             fill: aqua;
         }
-        
+
         .day-item.selected + .day {
             color: var(--text-primary-color);
         }
-        
+
         .day-item:not([disabled]) {
             cursor: pointer;
         }
-        
+
         .day-item[disabled] + .day {
             color: var(--text-disabled-color, #9d9d9d);
         }
-        
+
         .day-item.today + .day {
             color: var(--default-primary-color);
         }
-        
+
         .day-item.selected.today + .day {
             color: var(--text-primary-color);
         }
@@ -224,14 +224,14 @@
                 <div class="flex col self-stretch">
                     <div class="btn" on-tap="_prevMonth">
                         <paper-ripple center class="ripple circle"></paper-ripple>
-                        <iron-icon class="icon flex" icon="chevron-left"></iron-icon>
+                        <iron-icon class="icon flex" icon="ys-icons|general:chevron-left"></iron-icon>
                     </div>
                 </div>
                 <div class="flex-5"></div>
                 <div class="flex col self-stretch">
                     <div class="btn" on-tap="_nextMonth">
                         <paper-ripple center class="ripple circle"></paper-ripple>
-                        <iron-icon class="icon flex" icon="chevron-right"></iron-icon>
+                        <iron-icon class="icon flex" icon="ys-icons|general:chevron-right"></iron-icon>
                     </div>
                 </div>
             </div>
@@ -782,7 +782,7 @@
                 if (this.selectionTurn == "to" && moment(event.model.item.date).isSame(moment(this.dateRange.from))) {
                     this.selectionTurn = "from"
                 }
-                
+
                 // console.log(isToAndSameAsFrom);
                 if (this.selectionTurn == "from") {
                     this.dateRange = {
