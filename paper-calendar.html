@@ -664,15 +664,11 @@
             //     };
             // },
             _onSwipe: function(event) {
-                if (event.detail.direction === 'right') {
-                    this._prevMonth();
-                } else {
-                    this._nextMonth();
-                }
+                event.detail.direction === 'right' ?
+                    this._prevMonth() : this._nextMonth();
             },
             _once: function(eventName, callback, node) {
                 node = node || this;
-
                 function onceCallback() {
                     node.removeEventListener(eventName, onceCallback);
                     callback.apply(null, arguments);
@@ -680,6 +676,7 @@
                 node.addEventListener(eventName, onceCallback);
             },
             _incrMonth: function(i) {
+                i = this._onRTL(i * -1, i);
                 var date = new Date(this.currentYear, this.currentMonth - 1 + i);
                 var year = date.getFullYear();
                 var month = date.getMonth() + 1;
@@ -715,7 +712,7 @@
                 this.currentMonth = date.getMonth() + 1;
             },
             _dateRangeChanged: function(dateRange, oldValue) {
-                if(!dateRange.from) return;
+                if (!dateRange.from) return;
                 if (this.selectionTurn == "from") {
                     if (!this._isValidDate(dateRange.from)) {
                         console.warn('Invalid date: ' + dateRange);
@@ -758,10 +755,10 @@
                 dateRange.to.setHours(0, 0, 0, 0);
 
                 this.set('dateRange', dateRange);
-                if(this._isValidDate(dateRange.to)){
+                if (this._isValidDate(dateRange.to)) {
                     this.currentYear = dateRange.to.getFullYear();
                     this.currentMonth = dateRange.to.getMonth() + 1;
-                }else{
+                } else {
                     this.currentYear = dateRange.from.getFullYear();
                     this.currentMonth = dateRange.from.getMonth() + 1;
                 }
@@ -829,9 +826,14 @@
                 }
                 this._scrollWidth = (this.$.calendar.offsetWidth * this._months.length);
                 this.$.months.style.minWidth = this._scrollWidth + 'px';
+
+                var monthStart = this._onRTL(this._months.length - 1, 0);
+                var iInverse = this._onRTL(1, -1);
+
                 var i = ((this.currentYear * 12) + this.currentMonth) -
-                    ((this._months[0].year * 12) + this._months[0].month);
-                this._translateX(-i * this._containerWidth);
+                    ((this._months[monthStart].year * 12) + this._months[monthStart].month);
+                console.log(i, iInverse);
+                this._translateX(i * iInverse * this._containerWidth);
             },
             _resizeHandler: function() {
                 this._containerWidth = this.$.calendar.offsetWidth;
@@ -845,6 +847,9 @@
                 this.today = new Date();
                 this.today.setHours(0, 0, 0, 0);
             },
+            _onRTL: function(onRtlVal, onNonRtlVal) {
+                return this.locale == 'ar' ? onRtlVal : onNonRtlVal;
+            }
         });
     })();
     </script>
