@@ -306,7 +306,9 @@
                  */
                 minDate: {
                     type: Date,
-                    value: null
+                    value: function(){
+                      return moment().subtract(1,'day').toDate();
+                    }
                 },
                 /**
                  * The maximum allowed date
@@ -713,25 +715,6 @@
             },
             _dateRangeChanged: function(dateRange, oldValue) {
                 if (!dateRange.from) return;
-                if (this.selectionTurn == "from") {
-                    if (!this._isValidDate(dateRange.from)) {
-                        console.warn('Invalid date: ' + dateRange);
-                        this.dateRange = dateRange = oldValue;
-                    }
-                    if (!this._isValidDate(dateRange.from)) {
-                        console.warn('Invalid date: ' + dateRange);
-                        this.dateRange = dateRange = oldValue;
-                    }
-                } else {
-                    if (!this._isValidDate(dateRange.to)) {
-                        console.warn('Invalid date: ' + dateRange);
-                        this.dateRange = dateRange = oldValue;
-                    }
-                    if (!this._isValidDate(dateRange.to)) {
-                        console.warn('Invalid date: ' + dateRange);
-                        this.dateRange = dateRange = oldValue;
-                    }
-                }
 
                 if (this.selectionTurn == "from") {
                     if (oldValue && oldValue.from && oldValue.from.getTime && dateRange.from.getTime &&
@@ -745,7 +728,18 @@
                     }
                 }
 
-                // clone the date object so as not to have unintended effects on bindings
+                if (this.selectionTurn == "from") {
+                    if (!this._isValidDate(dateRange.from)) {
+                        console.warn('Invalid date: ' + dateRange);
+                        this.dateRange = dateRange = oldValue;
+                    }
+                } else {
+                    if (!this._isValidDate(dateRange.to)) {
+                        console.warn('Invalid date: ' + dateRange);
+                        this.dateRange = dateRange = oldValue;
+                    }
+                }
+
                 dateRange = {
                     from: moment(dateRange.from).toDate(),
                     to: moment(dateRange.to).toDate()
@@ -755,6 +749,7 @@
                 dateRange.to.setHours(0, 0, 0, 0);
 
                 this.set('dateRange', dateRange);
+
                 if (this._isValidDate(dateRange.to)) {
                     this.currentYear = dateRange.to.getFullYear();
                     this.currentMonth = dateRange.to.getMonth() + 1;
@@ -762,6 +757,8 @@
                     this.currentYear = dateRange.from.getFullYear();
                     this.currentMonth = dateRange.from.getMonth() + 1;
                 }
+
+                this.fire('paper-calendar::change', this);
             },
             _tapDay: function(event) {
 
@@ -777,7 +774,7 @@
             _tapDayRange: function(event) {
 
                 if (this.selectionTurn == "to" && moment(event.model.item.date).isSame(moment(this.dateRange.from))) {
-                    this.selectionTurn = "from"
+                    this.set("selectionTurn", "from");
                 }
 
                 // console.log(isToAndSameAsFrom);
@@ -786,25 +783,25 @@
                         from: event.model.item.date,
                         to: null
                     };
-                    this.selectionTurn = "to";
+                    this.set("selectionTurn","to");
                     // to
                 } else {
                     if (moment(event.model.item.date).isBefore(this.dateRange.from)) {
-                        this.selectionTurn = "from";
+                        this.set("selectionTurn", "from");
                         this.dateRange = {
                             from: event.model.item.date,
                             to: null
                         };
-                        this.selectionTurn = "to";
+                        this.set("selectionTurn","to");
                     } else {
                         this.dateRange = {
                             from: this.dateRange.from,
                             to: event.model.item.date
                         };
-                        this.selectionTurn = "from";
+                        this.set("selectionTurn", "from");
                     }
                 }
-                this.fire('date-range-change', this);
+                this.fire('paper-calendar::tap', this);
             },
             _isValidDate: function(date) {
                 return date && date.getTime && !isNaN(date.getTime());
