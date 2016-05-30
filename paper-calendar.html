@@ -265,10 +265,7 @@
                     type: Object,
                     notify: true,
                     value: function() {
-                        return {
-                            from: null,
-                            to: null
-                        };
+                        return {};
                     },
                     observer: '_dateRangeChanged'
                 },
@@ -306,8 +303,8 @@
                  */
                 minDate: {
                     type: Date,
-                    value: function(){
-                      return moment().subtract(1,'day').toDate();
+                    value: function() {
+                        return moment().subtract(1, 'day').toDate();
                     }
                 },
                 /**
@@ -336,16 +333,18 @@
                 Polymer.IronResizableBehavior
             ],
             observers: [
-                '_populate(currentYear, currentMonth, minDate, maxDate, locale)',
+                '_populate(currentYear, currentMonth, minDate, maxDate, locale, dateRange)',
             ],
             listeners: {
                 'iron-resize': '_resizeHandler',
                 'swiped': '_onSwipe'
             },
-            attached: function() {
+            ready: function() {
                 this._updateToday();
-                // this.currentMonth = this.date.getMonth() + 1;
-                // this.currentYear = this.date.getFullYear();
+                if (!this.dateRange) {
+                    this.currentMonth = this.date.getMonth() + 1;
+                    this.currentYear = this.date.getFullYear();
+                }
                 this._transitionEvent = this.style.WebkitTransition ? 'transitionEnd' : 'webkitTransitionEnd';
             },
             dateFormat: function(date, format, locale) {
@@ -371,6 +370,7 @@
                 var date, month, weeks, day, d, dayInfo, monthData, months = [];
 
                 // Make sure currentYear/currentMonth are in min/max range
+                console.log(currentMonth, minDate, maxDate);
                 if (minDate && new Date(currentYear, currentMonth, 0) < minDate) {
                     this.currentYear = minDate.getFullYear();
                     this.currentMonth = minDate.getMonth() + 1;
@@ -470,18 +470,25 @@
             },
             _getDayClassRange: function(cssClass, date) {
 
-                if (this.dateRange.from && this.dateRange.from.getTime() === date.getTime()) {
-                    cssClass += ' selected';
+                if (this.dateRange.from)
+                    var from = moment(this.dateRange.from).hours(0).minutes(0).seconds(0).milliseconds(0);
 
-                    if (moment(this.dateRange.to).isValid()) cssClass += ' from';
+                if (this.dateRange.to)
+                    var to = moment(this.dateRange.to).hours(0).minutes(0).seconds(0).milliseconds(0);
+
+                var current = moment(date).hours(0).minutes(0).seconds(0).milliseconds(0);
+
+                if (from && from.isSame(current)) {
+                    cssClass += ' selected';
+                    if (to && to.isValid()) cssClass += ' from';
                 }
 
-                if (this.dateRange.to && this.dateRange.to.getTime() === date.getTime()) {
+                if (to && to.isSame(current)) {
                     cssClass += ' to selected';
                 }
 
-                if (this.dateRange.to && this.dateRange.from) {
-                    if (moment(date).isBefore(moment(this.dateRange.to)) && moment(date).isAfter(moment(this.dateRange.from)))
+                if (to && from) {
+                    if (current.isBefore(to) && current.isAfter(from))
                         cssClass += ' in-btween';
                 }
 
@@ -671,6 +678,7 @@
             },
             _once: function(eventName, callback, node) {
                 node = node || this;
+
                 function onceCallback() {
                     node.removeEventListener(eventName, onceCallback);
                     callback.apply(null, arguments);
@@ -714,48 +722,24 @@
                 this.currentMonth = date.getMonth() + 1;
             },
             _dateRangeChanged: function(dateRange, oldValue) {
-                if (!dateRange.from) return;
 
-                if (this.selectionTurn == "from") {
-                    if (oldValue && oldValue.from && oldValue.from.getTime && dateRange.from.getTime &&
-                        dateRange.from.getTime() === oldValue.from.getTime()) {
-                        return;
-                    };
+                if (!dateRange) return;
+                if (dateRange && !dateRange.from) return;
+
+                var from = moment(dateRange.from).hours(0).minutes(0).seconds(0).milliseconds(0);
+                var to = moment(dateRange.to).hours(0).minutes(0).seconds(0).milliseconds(0);
+                var fromHasntChanged = (oldValue && from.isSame(moment(oldValue.from)));
+                var toHasntChanged = (oldValue && to.isSame(moment(oldValue.to)));
+                if (fromHasntChanged && toHasntChanged) return;
+
+                console.log(this.dateRange);
+
+                if (to.isValid()) {
+                    this.currentYear = this.dateRange.to.getFullYear();
+                    this.currentMonth = this.dateRange.to.getMonth() + 1;
                 } else {
-                    if (oldValue && oldValue.to && oldValue.to.getTime && dateRange.to.getTime &&
-                        dateRange.to.getTime() === oldValue.to.getTime()) {
-                        return;
-                    }
-                }
-
-                if (this.selectionTurn == "from") {
-                    if (!this._isValidDate(dateRange.from)) {
-                        console.warn('Invalid date: ' + dateRange);
-                        this.dateRange = dateRange = oldValue;
-                    }
-                } else {
-                    if (!this._isValidDate(dateRange.to)) {
-                        console.warn('Invalid date: ' + dateRange);
-                        this.dateRange = dateRange = oldValue;
-                    }
-                }
-
-                dateRange = {
-                    from: moment(dateRange.from).toDate(),
-                    to: moment(dateRange.to).toDate()
-                }
-
-                dateRange.from.setHours(0, 0, 0, 0);
-                dateRange.to.setHours(0, 0, 0, 0);
-
-                this.set('dateRange', dateRange);
-
-                if (this._isValidDate(dateRange.to)) {
-                    this.currentYear = dateRange.to.getFullYear();
-                    this.currentMonth = dateRange.to.getMonth() + 1;
-                } else {
-                    this.currentYear = dateRange.from.getFullYear();
-                    this.currentMonth = dateRange.from.getMonth() + 1;
+                    this.currentYear = this.dateRange.from.getFullYear();
+                    this.currentMonth = this.dateRange.from.getMonth() + 1;
                 }
 
                 this.fire('paper-calendar::change', this);
@@ -772,36 +756,62 @@
                 this.date = event.model.item.date;
             },
             _tapDayRange: function(event) {
-
-                if (this.selectionTurn == "to" && moment(event.model.item.date).isSame(moment(this.dateRange.from))) {
-                    this.set("selectionTurn", "from");
-                }
-
-                // console.log(isToAndSameAsFrom);
-                if (this.selectionTurn == "from") {
-                    this.dateRange = {
-                        from: event.model.item.date,
-                        to: null
-                    };
-                    this.set("selectionTurn","to");
-                    // to
-                } else {
-                    if (moment(event.model.item.date).isBefore(this.dateRange.from)) {
-                        this.set("selectionTurn", "from");
-                        this.dateRange = {
-                            from: event.model.item.date,
-                            to: null
-                        };
-                        this.set("selectionTurn","to");
-                    } else {
-                        this.dateRange = {
-                            from: this.dateRange.from,
-                            to: event.model.item.date
-                        };
-                        this.set("selectionTurn", "from");
-                    }
+                var from = moment(this.dateRange.from);
+                var to = moment(this.dateRange.to);
+                var current = moment(event.model.item.date);
+                console.log(this.selectionTurn);
+                switch (this.selectionTurn) {
+                    case "from":
+                        {
+                            this.set('dateRange',{ from :  current.toDate(), to : null });
+                            this.set('selectionTurn', 'to');
+                        }
+                        break;
+                    case "to":
+                        {
+                          if(current.isSame(from) || current.isBefore(from)){
+                            this.set('selectionTurn', 'from')
+                            this._tapDayRange(event);
+                            return true;
+                          }
+                          this.set('dateRange',{
+                            from : from.toDate(),
+                            to :  current.toDate()
+                          });
+                          this.set('selectionTurn', 'from');
+                        }
+                        break;
+                    default:
+                        console.log("whaat")
                 }
                 this.fire('paper-calendar::tap', this);
+                // if (this.selectionTurn == "to" && moment(event.model.item.date).isSame(moment(this.dateRange.from))) {
+                //     this.set("selectionTurn", "from");
+                // }
+
+                // if (this.selectionTurn == "from") {
+                //     this.set('dateRange', {
+                //         from: event.model.item.date,
+                //         to: null
+                //     });
+                //     this.set("selectionTurn", "to");
+                // } else {
+                //     if (moment(event.model.item.date).isBefore(this.dateRange.from)) {
+                //         this.set("selectionTurn", "from");
+                //         this.set('dateRange', {
+                //             from: event.model.item.date,
+                //             to: null
+                //         });
+                //         this.set("selectionTurn", "to");
+                //     } else {
+                //         this.set('dateRange', {
+                //             from: this.dateRange.from,
+                //             to: event.model.item.date
+                //         });
+                //         this.set("selectionTurn", "from");
+                //     }
+                // }
+                // this.fire('paper-calendar::tap', this);
             },
             _isValidDate: function(date) {
                 return date && date.getTime && !isNaN(date.getTime());
