@@ -370,7 +370,6 @@
                 var date, month, weeks, day, d, dayInfo, monthData, months = [];
 
                 // Make sure currentYear/currentMonth are in min/max range
-                console.log(currentMonth, minDate, maxDate);
                 if (minDate && new Date(currentYear, currentMonth, 0) < minDate) {
                     this.currentYear = minDate.getFullYear();
                     this.currentMonth = minDate.getMonth() + 1;
@@ -732,7 +731,6 @@
                 var toHasntChanged = (oldValue && to.isSame(moment(oldValue.to)));
                 if (fromHasntChanged && toHasntChanged) return;
 
-                console.log(this.dateRange);
 
                 if (to.isValid()) {
                     this.currentYear = this.dateRange.to.getFullYear();
@@ -759,7 +757,6 @@
                 var from = moment(this.dateRange.from);
                 var to = moment(this.dateRange.to);
                 var current = moment(event.model.item.date);
-                console.log(this.selectionTurn);
                 switch (this.selectionTurn) {
                     case "from":
                         {
@@ -839,7 +836,7 @@
 
                 var i = ((this.currentYear * 12) + this.currentMonth) -
                     ((this._months[monthStart].year * 12) + this._months[monthStart].month);
-                console.log(i, iInverse);
+
                 this._translateX(i * iInverse * this._containerWidth);
             },
             _resizeHandler: function() {
