@@ -339,9 +339,9 @@
                 'iron-resize': '_resizeHandler',
                 'swiped': '_onSwipe'
             },
-            ready: function() {
+            attached: function() {
                 this._updateToday();
-                if (!this.dateRange) {
+                if (!this.dateRange.from) {
                     this.currentMonth = this.date.getMonth() + 1;
                     this.currentYear = this.date.getFullYear();
                 }
@@ -721,7 +721,7 @@
                 this.currentMonth = date.getMonth() + 1;
             },
             _dateRangeChanged: function(dateRange, oldValue) {
-
+              console.log('_dateRangeChanged', dateRange);
                 if (!dateRange) return;
                 if (dateRange && !dateRange.from) return;
 
