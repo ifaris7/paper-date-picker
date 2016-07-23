@@ -5,7 +5,7 @@
 <link rel="import" href="../paper-styles/paper-styles.html">
 <link rel="import" href="../iron-resizable-behavior/iron-resizable-behavior.html">
 <link rel="import" href="../iron-selector/iron-selector.html">
-<link rel="import" href="../moment-element/moment-with-locales-import.html">
+<link rel="import" href="../../elements/moment-import.html">
 <link rel="import" href="../iron-media-query/iron-media-query.html">
 <link rel="import" href="../neon-animation/neon-animated-pages.html">
 <link rel="import" href="../neon-animation/neon-animatable.html">
@@ -357,6 +357,7 @@
             },
             _localeChanged: function(locale) {
                 // FIXME: use public API for getting locale-aware weekdays once moment/moment#2433 is fixed
+                console.log(locale);
                 var localeData = moment.localeData(locale);
                 var fdow = localeData._week.dow;
                 this.set('_firstDayOfWeek', fdow);
