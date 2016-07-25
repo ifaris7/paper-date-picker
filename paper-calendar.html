@@ -357,7 +357,7 @@
             },
             _localeChanged: function(locale) {
                 // FIXME: use public API for getting locale-aware weekdays once moment/moment#2433 is fixed
-                console.log(locale);
+                // console.log(locale);
                 var localeData = moment.localeData(locale);
                 var fdow = localeData._week.dow;
                 this.set('_firstDayOfWeek', fdow);
@@ -722,7 +722,7 @@
                 this.currentMonth = date.getMonth() + 1;
             },
             _dateRangeChanged: function(dateRange, oldValue) {
-              console.log('_dateRangeChanged', dateRange);
+              // console.log('_dateRangeChanged', dateRange);
                 if (!dateRange) return;
                 if (dateRange && !dateRange.from) return;
 
@@ -780,7 +780,7 @@
                         }
                         break;
                     default:
-                        console.log("whaat")
+                        // console.log("whaat")
                 }
                 this.fire('paper-calendar::tap', this);
                 // if (this.selectionTurn == "to" && moment(event.model.item.date).isSame(moment(this.dateRange.from))) {
